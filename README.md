@@ -6,7 +6,7 @@ In order to achieve this goal it is necessary to implement a "playground" that m
 
 ### Activity data
 
-The raw data can be found in the directory "./event_data" that contains CSV files with user activity:
+The raw data can be found in the directory `./event_data` that contains CSV files with user activity:
 
 ```
 ./event_data
@@ -22,35 +22,89 @@ These files are partitioned by date with the format `YYYY-MM-DD-events.csv`. The
 
 ```
 {
-artist TEXT,
-auth TEXT,
-firstName TEXT,
-gender TEXT,
-itemInSession INT,
-lastName TEXT,
-length DOUBLE,
-level TEXT,
-location TEXT,
-method TEXT,
-page TEXT,
-registration DOUBLE,
-sessionId INT,
-song TEXT,
-status INT,
-ts FLOAT,
-userId INT
+  artist TEXT,
+  auth TEXT,
+  firstName TEXT,
+  gender TEXT,
+  itemInSession INT,
+  lastName TEXT,
+  length DOUBLE,
+  level TEXT,
+  location TEXT,
+  method TEXT,
+  page TEXT,
+  registration DOUBLE,
+  sessionId INT,
+  song TEXT,
+  status INT,
+  ts FLOAT,
+  userId INT
 }
 ```
 
-In order to process all this information we will build an ETL (extract, transform, load) pipeline that brings the CSV data all-together into a database. Due to the nature of this use-case it is expected that in a real scenario for widely used applications terabytes of data are generated. In these situations it is more convenient to employ a NoSQL model instead the regular SQL ones. We will use [Apache Cassandra](https://github.com/apache/cassandra) to host the database since it is a highly-scalable partitioned row store. This means that the data is organized in rows and columns (like in the SQL model) and partitioned by an unique key/identifier.  
+In order to process all this information we will make use of an ETL (extract, transform, load) pipeline that brings the CSV data all-together into a single file. Due to the nature of this use-case it is expected that in a real scenario for widely used applications terabytes of data are generated. In these situations it is more convenient to employ a NoSQL model instead the regular SQL ones. We will use [Apache Cassandra](https://github.com/apache/cassandra) to host the database since it is a highly-scalable partitioned row store. This means that the data is organized in rows and columns (like in the SQL model) and partitioned by an unique key/identifier.  
 
-In Apache Cassandra the queries are executed in the Cassandra Query Language [CQL](https://cassandra.apache.org/doc/latest/cql/) which is very similar to SQL. However, it is very important to have in mind that JOIN and GOUP BY statements do not exist in Apache Cassandra and, therefore, the data must undergo a process of [denormalization](https://www.datastax.com/blog/basic-rules-cassandra-data-modeling) as we need to model the database according to the queries we want to run.
+In Apache Cassandra the queries are executed in the Cassandra Query Language [CQL](https://cassandra.apache.org/doc/latest/cql/) which is very similar to SQL. However, it is very important to have in mind that JOIN and GOUP BY statements do not exist in Apache Cassandra. This has two implications: first the data must undergo a process of [denormalization](https://www.datastax.com/blog/basic-rules-cassandra-data-modeling) and secondly the database must be modelled according to the questions that we want to answer or, in other words, the target queries. Below you can find the target queries that will be employed to model the database.
+
+##### Query 1: What is the artist, song title and song's length in the music app history that was heard during sessionId = 338 and itemInSession = 4?
+
+CQL of the query 1: `SELECT artist, song, length FROM <table_name> WHERE sessionId = 228 AND itemInSession = 4`
+
+##### Query 2: What is the name of artist, song (sorted by itemInSession) and user (first and last name) for userid = 10, sessionid = 182?
+
+CQL of the query 2: `SELECT artist, song, firstName, lastName FROM <table_name> WHERE userid = 10 AND sessionid = 182`
+
+##### Query 3: What are the user names (first and last) in the music app history who listened to the song 'All Hands Against His Own'?
+
+CQL of the query 3: `SELECT firstName, lastName FROM <table_name> WHERE song = 'All Hands Against His Own'`
 
 ### Code workflow
 
-#### Step 1: preprocessing the data
+The workflow employed to set-up this use-case can be found in the Jupyter notebook `./Project_1B_ Project_Template.ipynb` and it is divided into two steps: (1) a data preprocessing stage and (2) the database configuration followed by data ingestion.
 
-#### Step 2: database configuration
+#### Step 1: data preprocessing
+
+This step is included in the Part I of `./Project_1B_ Project_Template.ipynb` its purpose is to gather from the event data files the required information to answer the target queries. For this purpose, the code follwing code is employed:
+
+```
+[...]
+
+with open('event_datafile_new.csv', 'w', encoding = 'utf8', newline='') as f:
+    writer = csv.writer(f, dialect='myDialect')
+    writer.writerow(['artist','firstName','gender','itemInSession','lastName','length',\
+                'level','location','sessionId','song','userId'])
+    for row in full_data_rows_list:
+        if (row[0] == ''):
+            # The rows without artist information (empty strings) are skipped
+            continue
+        writer.writerow((row[0], row[2], row[3], row[4], row[5], row[6], row[7], row[8], row[12], row[13], row[16]))
+
+[...]
+```
+
+As one can notice, the processing logic is implemented to walk through the event logs and gather the values in the fields `'artist'`, `'firstName'`, `'gender'`, `'itemInSession'`, `'lastName'`, `'length`, `'level'`, `'location'`, `'sessionId'`, `'song'`, `'userId'`. All this information will be written into a single file named `./event_datafile_new.csv` with the following schema:
+
+```
+{
+  artist TEXT,
+  firstName TEXT,
+  gender TEXT,
+  itemInSession INT,
+  lastName TEXT,
+  length DOUBLE,
+  level TEXT,
+  location TEXT,
+  sessionId INT,
+  song TEXT,
+  userId INT
+}
+```
+
+#### Step 2: database configuration and data ingestion 
+
+
+
+
 
 ### Requirements
 
