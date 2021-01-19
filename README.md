@@ -44,7 +44,7 @@ userId INT
 
 In order to process all this information we will build an ETL (extract, transform, load) pipeline that brings the CSV data all-together into a database. Due to the nature of this use-case it is expected that in a real scenario for widely used applications terabytes of data are generated. In these situations it is more convenient to employ a NoSQL model instead the regular SQL ones. We will use [Apache Cassandra](https://github.com/apache/cassandra) to host the database since it is a highly-scalable partitioned row store. This means that the data is organized in rows and columns (like in the SQL model) and partitioned by an unique key/identifier.  
 
-In Apache Cassandra the queries are executed in the Cassandra Query Language [CQL](https://cassandra.apache.org/doc/latest/cql/) which is very similar to SQL. However, JOIN and GOUP BY statements do not exist in Apache Cassandra and, therefore, the data must undergo a process of [denormalization](https://www.datastax.com/blog/basic-rules-cassandra-data-modeling). It is very important to have in mind that the database will be modeled according to the queries and not the other way around.
+In Apache Cassandra the queries are executed in the Cassandra Query Language [CQL](https://cassandra.apache.org/doc/latest/cql/) which is very similar to SQL. However, it is very important to have in mind that JOIN and GOUP BY statements do not exist in Apache Cassandra and, therefore, the data must undergo a process of [denormalization](https://www.datastax.com/blog/basic-rules-cassandra-data-modeling) as we need to model the database according to the queries we want to run.
 
 ### Code workflow
 
