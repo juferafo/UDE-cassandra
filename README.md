@@ -82,7 +82,7 @@ with open('event_datafile_new.csv', 'w', encoding = 'utf8', newline='') as f:
 [...]
 ```
 
-As one can notice, the processing logic is implemented to walk through the event logs and gather the values in the fields `'artist'`, `'firstName'`, `'gender'`, `'itemInSession'`, `'lastName'`, `'length`, `'level'`, `'location'`, `'sessionId'`, `'song'`, `'userId'`. All this information will be written into a single file named `./event_datafile_new.csv` with the following schema:
+As one can notice, the processing logic is implemented to walk through the event logs and gather the values in the fields `artist`, `firstName`, `gender`, `itemInSession`, `lastName`, `length`, `level`, `location`, `sessionId`, `song`, `userId`. All this information will be written into a single file named `./event_datafile_new.csv` with the following schema:
 
 ```
 {
@@ -102,9 +102,31 @@ As one can notice, the processing logic is implemented to walk through the event
 
 #### Step 2: database configuration and data ingestion 
 
+This step is included in the Part II of `./Project_1B_ Project_Template.ipynb`. Once the valuable data has been saved into `./Project_1B_ Project_Template.ipynb` it is time to configure the database. The first part of this step is to generate the [keyspace](https://cassandra.apache.org/doc/latest/cql/ddl.html#create-keyspace) that will host the tables. For this purpose we have employed the below DDL statement
 
+```
+CREATE KEYSPACE IF NOT EXISTS sparkify
+    WITH REPLICATION = {'class' : 'SimpleStrategy',
+                       'replication_factor' : 1}"
+```
 
+The `REPLICATION` parameters are employed to configure how the data is [distributed accross the cluster](https://docs.datastax.com/en/cassandra-oss/3.x/cassandra/architecture/archDataDistributeReplication.html). For a production scenario this is an important part of the configuration since it may impact the overall performance of the queries. For sake of simplicity we will consider that only one datacenter is available which means that the replication class is set to `SimpleStrategy` and the replication factor is set to `1`.
 
+One of the best practices of Apache Cassandra is to employ one table per query including just the necessary fields. The reason behind this is that Apache Cassandra works with rows partitioned by unique identifiers so-called [primary keys](https://www.datastax.com/blog/most-important-thing-know-cassandra-data-modeling-primary-key) that must be included in order inside the query. This, together with the absence of JOIN statements makes the usage of independent tables very benefitial as we will avoid query incompatibilities. [This](https://stackoverflow.com/questions/24949676/difference-between-partition-key-composite-key-and-clustering-key-in-cassandra) Stackoverflow post provides a good insight on this matter.
+
+Making use of the `create_table` and `insert_query` methods included in `./lib.py` the tables `table1`, `table2` and `table3` corresponding to query1, query2 and query3 are generated with the relevant fields and primary keys and the data inserted. After each data insertion, each query is executed yielding the following results:
+
+1. Query 1: `SELECT artist, song, length FROM table1 WHERE sessionId = 275 AND itemInSession = 4`
+
+Output:
+
+2. Query 2: `SELECT iteminsession, artist, song, firstName, lastName FROM table2 WHERE userid = 42 AND sessionid = 275`
+
+Output:
+
+3. Query 3: `SELECT firstName, lastName FROM table3 WHERE song = 'I Second That Emotion'`
+
+Output:
 
 ### Requirements
 
