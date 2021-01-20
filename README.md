@@ -114,19 +114,7 @@ In Apache Cassandra the [`REPLICATION`](https://docs.datastax.com/en/cassandra-o
 
 One of the best practices to keep in mind in Apache Cassandra is to use one table per query including just the necessary fields to execute the query. This is because Apache Cassandra works with data partitioned by unique identifiers so-called [primary keys](https://www.datastax.com/blog/most-important-thing-know-cassandra-data-modeling-primary-key) that must be included in order inside the query. This, together with the absence of JOIN statements makes the usage of independent tables very benefitial as we will avoid query incompatibilities. [This](https://stackoverflow.com/questions/24949676/difference-between-partition-key-composite-key-and-clustering-key-in-cassandra) Stackoverflow post provides a good insight on this topic.
 
-Making use of the `create_table` and `insert_query` methods included in `./lib.py` the tables `table1`, `table2` and `table3` corresponding to query1, query2 and query3 are generated with the relevant fields and the data inserted. After each data insertion, each query is executed yielding the following results:
-
-1. Query 1: `SELECT artist, song, length FROM table1 WHERE sessionId = 275 AND itemInSession = 4`
-
-Output:
-
-2. Query 2: `SELECT iteminsession, artist, song, firstName, lastName FROM table2 WHERE userid = 42 AND sessionid = 275`
-
-Output:
-
-3. Query 3: `SELECT firstName, lastName FROM table3 WHERE song = 'I Second That Emotion'`
-
-Output:
+Making use of the `create_table` and `insert_query` methods included in `./lib.py` the tables `artist_song`, `user_playlist_songs` and `user_songs` corresponding to query1, query2 and query3 are generated with the relevant fields and the data inserted. After each data insertion the corresponding query is executed.
 
 ### Requirements
 
