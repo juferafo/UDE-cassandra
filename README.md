@@ -118,6 +118,8 @@ Making use of the `create_table` and `insert_query` methods included in `./lib.p
 
 ### Requirements
 
+Below you can find the requirements needed to run this repository.
+
 * [pandas](https://pandas.pydata.org/getting_started.html)
 * [NumPy](https://numpy.org/install/)
 * [DataStax Driver for Apache Cassandra](https://github.com/datastax/python-driver#datastax-driver-for-apache-cassandra)
